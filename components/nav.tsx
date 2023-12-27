@@ -3,35 +3,37 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { WindowIcon } from '@heroicons/react/24/solid';
+import { LucideIcon, LayoutDashboard, Palmtree } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { forwardRef, Ref } from 'react';
 
-const dummy: { name: string; href: string; icon: unknown }[] = [
+type NavigationItem = {
+  name?: string;
+  href: string;
+  icon: LucideIcon;
+};
+
+const dummy: NavigationItem[] = [
   {
     name: 'ㅇㅇ',
     href: '/',
-    icon: WindowIcon,
+    icon: LayoutDashboard,
   },
   {
     name: '대시보드',
     href: '/dashboard',
-    icon: WindowIcon,
+    icon: LayoutDashboard,
   },
   {
     name: '휴가',
     href: '/off',
-    icon: WindowIcon,
+    icon: Palmtree,
   },
 ];
 
-const NavItem = ({
-  name,
-  href,
-  icon,
-}: {
-  name: string;
-  href: string;
-  icon: any;
-}) => {
+const NavItem = ({ name, href, icon }: NavigationItem) => {
   const pathname = usePathname();
   const firstPathname = '/' + pathname.split('/')[1];
   const LinkIcon = icon;
@@ -49,20 +51,60 @@ const NavItem = ({
   );
 };
 
-const Nav = () => {
+const NavItemCollapsed = forwardRef(function NavItemCollapsed(
+  { href, icon }: NavigationItem,
+  ref: Ref<HTMLAnchorElement>
+) {
+  const pathname = usePathname();
+  const firstPathname = '/' + pathname.split('/')[1];
+  const LinkIcon = icon;
+
   return (
-    <nav className="flex flex-col gap-1 px-4 py-2">
-      {dummy.map((item) => {
-        return (
-          <NavItem
-            name={item.name}
-            href={item.href}
-            key={item.name}
-            icon={item.icon}
-          ></NavItem>
-        );
-      })}
-    </nav>
+    <Link
+      href={href}
+      className={cn(
+        buttonVariants({
+          variant: firstPathname === href ? 'secondary' : 'ghost',
+          size: 'icon',
+        })
+      )}
+      ref={ref}
+    >
+      <LinkIcon className="w-6" />
+    </Link>
+  );
+});
+
+const Nav = ({ isCollapsed }: { isCollapsed: boolean }) => {
+  return (
+    <div
+      data-collapsed={isCollapsed}
+      className="group flex flex-col gap-4 py-2 data-[collapsed=true]:py-2"
+    >
+      <nav className="grid gap-1 px-2 group-[[data-collapsed=true]]:justify-center group-[[data-collapsed=true]]:px-2">
+        {dummy.map((item) =>
+          isCollapsed ? (
+            <Tooltip key={item.name} delayDuration={0}>
+              <TooltipTrigger asChild>
+                <NavItemCollapsed
+                  href={item.href}
+                  key={item.name}
+                  icon={item.icon}
+                />
+              </TooltipTrigger>
+              <TooltipContent>{item.name}</TooltipContent>
+            </Tooltip>
+          ) : (
+            <NavItem
+              name={item.name}
+              href={item.href}
+              key={item.name}
+              icon={item.icon}
+            />
+          )
+        )}
+      </nav>
+    </div>
   );
 };
 

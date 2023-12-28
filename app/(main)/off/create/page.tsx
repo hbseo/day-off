@@ -1,4 +1,5 @@
 import Breadcrumbs from '@/components/breadcrumbs';
+import CardWrapper from '@/components/off/cards';
 import Form from '@/components/off/create-form';
 
 const Page = () => {
@@ -10,7 +11,11 @@ const Page = () => {
           { label: '신청', href: '/off/create', active: true },
         ]}
       />
-      <Form />
+      <main className="space-y-4">
+        <h1 className="text-xl font-bold">현황</h1>
+        <CardWrapper />
+        <Form />
+      </main>
     </div>
   );
 };

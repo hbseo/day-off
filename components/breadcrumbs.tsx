@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 type Breadcrumb = {
@@ -15,7 +15,7 @@ const Breadcrumbs = ({ breadcrumbs }: { breadcrumbs: Breadcrumb[] }) => {
           <li
             key={breadcrumb.href}
             aria-current={breadcrumb.active}
-            className={clsx(
+            className={cn(
               breadcrumb.active ? 'text-gray-900' : 'text-gray-500'
             )}
           >

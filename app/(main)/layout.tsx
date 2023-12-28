@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex h-full flex-col items-stretch">
+      <div className="flex h-full w-full flex-col items-stretch">
         <Header />
         <Separator />
         <ResizablePanelGroup direction="horizontal" className="h-full">

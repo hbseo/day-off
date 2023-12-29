@@ -1,22 +1,13 @@
 'use client';
 
 import { fetchTypeData } from '@/lib/off/data';
-import { cn } from '@/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ko } from 'date-fns/locale';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Button } from '../ui/button';
 import { Calendar } from '../ui/calendar';
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from '../ui/command';
+import { Card } from '../ui/card';
 import {
   Form as FormContainer,
   FormControl,
@@ -27,11 +18,11 @@ import {
   FormMessage,
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import DateItem from './date-item';
-import { getMonth, getDate, getYear, getDay } from 'date-fns';
+import DropdownForm from './dropdown-form';
 
 const offFormSchema = z.object({
   fromUser: z.number({
@@ -43,28 +34,27 @@ const offFormSchema = z.object({
   type: z.number({
     required_error: '종류를 선택해야 합니다.',
   }),
-  reason: z.string({
-    required_error: '사유를 입력해야 합니다.',
+  reason: z
+    .string({
+      required_error: '사유를 입력해야 합니다.',
+    })
+    .optional(),
+  date: z.array(z.object({ date: z.date(), type: z.string() }), {
+    required_error: '적어도 하나의 날짜를 선택해야 합니다.',
   }),
-  date: z.object({ date: z.date(), type: z.number() }),
 });
 
 const Form = () => {
-  const [openFromUser, setOpenFromUser] = useState(false);
-  const [openToUser, setOpenToUser] = useState(false);
-  const [openType, setOpenType] = useState(false);
-  const [dateList, setDateList] = useState<
-    {
-      date: Date;
-      type: number;
-    }[]
-  >([]);
-
   const form = useForm<z.infer<typeof offFormSchema>>({
     resolver: zodResolver(offFormSchema),
+    defaultValues: {
+      reason: '',
+    },
   });
 
-  const onSubmit = (data: z.infer<typeof offFormSchema>) => {};
+  const onSubmit = (data: z.infer<typeof offFormSchema>) => {
+    console.log(data);
+  };
 
   const users = [
     {
@@ -82,179 +72,32 @@ const Form = () => {
     <FormContainer {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
+          <DropdownForm
+            form={form}
             name="fromUser"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>신청</FormLabel>
-                <Popover open={openFromUser} onOpenChange={setOpenFromUser}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          'justify-between',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value
-                          ? users.find((user) => user.id === field.value)?.name
-                          : '선택하세요.'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="popover-content-fit-trigger p-0">
-                    <Command>
-                      <CommandInput placeholder="검색" className="h-9" />
-                      <CommandEmpty>없음</CommandEmpty>
-                      <CommandGroup>
-                        {users.map((user) => (
-                          <CommandItem
-                            value={user.name}
-                            key={user.id}
-                            onSelect={() => {
-                              form.setValue('fromUser', user.id);
-                              setOpenFromUser(false);
-                            }}
-                          >
-                            {user.name}
-                            <Check
-                              className={cn(
-                                'ml-auto h-4 w-4',
-                                user.id === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>신청자 본인을 선택합니다.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            title="신청"
+            data={users}
+            keyField="id"
+            displayField="name"
+            description="신청자 본인을 선택합니다"
           />
-          <FormField
-            control={form.control}
+          <DropdownForm
+            form={form}
             name="toUser"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>결재</FormLabel>
-                <Popover open={openToUser} onOpenChange={setOpenToUser}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        className={cn(
-                          'justify-between',
-                          !field.value && 'text-muted-foreground'
-                        )}
-                      >
-                        {field.value
-                          ? users.find((user) => user.id === field.value)?.name
-                          : '선택하세요.'}
-                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="popover-content-fit-trigger p-0">
-                    <Command>
-                      <CommandInput placeholder="검색" className="h-9" />
-                      <CommandEmpty>없음</CommandEmpty>
-                      <CommandGroup>
-                        {users.map((user) => (
-                          <CommandItem
-                            value={user.name}
-                            key={user.id}
-                            onSelect={() => {
-                              form.setValue('toUser', user.id);
-                              setOpenToUser(false);
-                            }}
-                          >
-                            {user.name}
-                            <Check
-                              className={cn(
-                                'ml-auto h-4 w-4',
-                                user.id === field.value
-                                  ? 'opacity-100'
-                                  : 'opacity-0'
-                              )}
-                            />
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>결재해 줄 사람을 선택합니다.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            title="결재"
+            data={users}
+            keyField="id"
+            displayField="name"
+            description="결재해 줄 사람을 선택합니다."
           />
         </div>
-        <FormField
-          control={form.control}
+        <DropdownForm
+          form={form}
           name="type"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>종류</FormLabel>
-              <Popover open={openType} onOpenChange={setOpenType}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      className={cn(
-                        'justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? types.find((type) => type.id === field.value)?.type
-                        : '선택하세요.'}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="popover-content-fit-trigger p-0">
-                  <Command>
-                    <CommandInput placeholder="검색" className="h-9" />
-                    <CommandEmpty>없음</CommandEmpty>
-                    <CommandGroup>
-                      {types.map((type) => (
-                        <CommandItem
-                          value={type.type}
-                          key={type.id}
-                          onSelect={() => {
-                            form.setValue('type', type.id);
-                            setOpenType(false);
-                          }}
-                        >
-                          {type.type}
-                          <Check
-                            className={cn(
-                              'ml-auto h-4 w-4',
-                              type.id === field.value
-                                ? 'opacity-100'
-                                : 'opacity-0'
-                            )}
-                          />
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
+          title="종류"
+          data={types}
+          keyField="id"
+          displayField="type"
         />
         <FormField
           control={form.control}
@@ -263,40 +106,30 @@ const Form = () => {
             <FormItem>
               <FormLabel>날짜</FormLabel>
               <FormControl>
-                <div className="grid sm:grid-cols-[1fr_0fr_3fr] sm:gap-4">
+                <div className="grid sm:gap-4 md:grid-cols-[1fr_0fr_3fr]">
                   <Calendar
                     mode={'multiple'}
-                    selected={dateList.map((date) => date.date)}
+                    selected={field.value?.map((date) => date?.date)}
                     onSelect={(date) => {
-                      console.log(date);
-                      if (!date) return;
-                      const newDateList = [...dateList].push({
-                        date: date[date.length - 1],
-                        type: 1,
+                      const afterDate: { date: Date; type: string }[] = [];
+
+                      field.value?.forEach((f) => {
+                        const pos = date?.indexOf(f.date);
+                        if (pos !== undefined && pos >= 0) {
+                          afterDate.push(f);
+                          if (date) delete date[pos];
+                        }
                       });
-                      if (!date) return;
-                      // if (
-                      //   dateList.find((d) => {
-                      //     if (
-                      //       getYear(d.date) === getYear(date) &&
-                      //       getMonth(d.date) === getMonth(date) &&
-                      //       getDate(d.date) === getDate(date)
-                      //     )
-                      //       return true;
-                      //   })
-                      // )
-                      //   return;
-                      // const newDateList = [
-                      //   ...dateList,
-                      //   {
-                      //     date: date,
-                      //     type: 1,
-                      //   },
-                      // ];
-                      // newDateList.sort(
-                      //   (d1, d2) => d1.date.getTime() - d2.date.getTime()
-                      // );
-                      // setDateList(newDateList);
+
+                      date?.forEach((d) => {
+                        if (d) {
+                          afterDate.push({ date: d, type: 'all' });
+                        }
+                      });
+                      afterDate.sort(
+                        (o1, o2) => o1.date.getTime() - o2.date.getTime()
+                      );
+                      field.onChange(afterDate);
                     }}
                     disabled={(date) => date < new Date('2023-01-01')}
                     locale={ko}
@@ -304,21 +137,72 @@ const Form = () => {
                     className="flex justify-center"
                   />
                   <Separator orientation="vertical" />
-                  <ScrollArea className="max-h-28 sm:max-h-[350px]">
-                    <ul className="flex flex-col">
-                      {dateList.map((date, index) =>
-                        date.date ? (
-                          <DateItem
-                            key={index}
-                            date={date.date}
-                            type={date.type}
-                          />
-                        ) : null
-                      )}
+                  <ScrollArea className="max-h-32 sm:max-h-[350px]">
+                    <ul className="flex flex-col gap-2">
+                      {field.value?.map((date, index) => (
+                        <Card
+                          key={index}
+                          className="flex h-16 flex-col justify-center gap-2 px-3 lg:h-9 lg:flex-row lg:items-center lg:justify-normal lg:gap-0 lg:gap-x-2"
+                        >
+                          <DateItem date={date.date} />
+                          <RadioGroup
+                            onValueChange={(value) => {
+                              const afterDate = field.value;
+                              afterDate[index].type = value;
+                              field.onChange(afterDate);
+                            }}
+                            defaultValue={field.value[index].type}
+                            className="flex w-64"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem
+                                  value="all"
+                                  checked={field.value[index].type === 'all'}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                연차
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem
+                                  value="morning"
+                                  checked={
+                                    field.value[index].type === 'morning'
+                                  }
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                오전 반차
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem
+                                  value="afternoon"
+                                  checked={
+                                    field.value[index].type === 'afternoon'
+                                  }
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                오후 반차
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </Card>
+                      ))}
                     </ul>
                   </ScrollArea>
                 </div>
               </FormControl>
+              <FormDescription>
+                원하는 날짜를 선택하여 추가 또는 삭제를 합니다. 연차 / 반차
+                여부를 선택합니다.
+              </FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -335,7 +219,9 @@ const Form = () => {
             </FormItem>
           )}
         />
-        <Button type="submit">버튼</Button>
+        <Button type="submit" className="w-full sm:w-28">
+          신청
+        </Button>
       </form>
     </FormContainer>
   );

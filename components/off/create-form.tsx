@@ -26,7 +26,7 @@ import DropdownForm from './dropdown-form';
 
 const offFormSchema = z.object({
   fromUser: z.number({
-    required_error: '신청자를 선택해야 합니다..',
+    required_error: '신청자를 선택해야 합니다.',
   }),
   toUser: z.number({
     required_error: '결재자를 선택해야 합니다.',
@@ -39,9 +39,11 @@ const offFormSchema = z.object({
       required_error: '사유를 입력해야 합니다.',
     })
     .optional(),
-  date: z.array(z.object({ date: z.date(), type: z.string() }), {
-    required_error: '적어도 하나의 날짜를 선택해야 합니다.',
-  }),
+  date: z
+    .array(z.object({ date: z.date(), type: z.string() }), {
+      required_error: '날짜를 하나 이상 선택하세요.',
+    })
+    .nonempty({ message: '날짜를 하나 이상 선택하세요.' }),
 });
 
 const Form = () => {
@@ -70,7 +72,7 @@ const Form = () => {
 
   return (
     <FormContainer {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <DropdownForm
             form={form}
@@ -79,7 +81,7 @@ const Form = () => {
             data={users}
             keyField="id"
             displayField="name"
-            description="신청자 본인을 선택합니다"
+            placeholder="신청자 본인을 선택합니다."
           />
           <DropdownForm
             form={form}
@@ -88,7 +90,7 @@ const Form = () => {
             data={users}
             keyField="id"
             displayField="name"
-            description="결재해 줄 사람을 선택합니다."
+            placeholder="결재해 줄 사람을 선택합니다."
           />
         </div>
         <DropdownForm
@@ -98,13 +100,14 @@ const Form = () => {
           data={types}
           keyField="id"
           displayField="type"
+          placeholder="휴가 종류를 선택합니다."
         />
         <FormField
           control={form.control}
           name="date"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>날짜</FormLabel>
+              <FormLabel className="text-md font-bold">날짜</FormLabel>
               <FormControl>
                 <div className="grid sm:gap-4 md:grid-cols-[1fr_0fr_3fr]">
                   <Calendar
@@ -211,9 +214,9 @@ const Form = () => {
           name="reason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>사유</FormLabel>
+              <FormLabel className="text-md font-bold">사유</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="사유를 입력하세요." {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

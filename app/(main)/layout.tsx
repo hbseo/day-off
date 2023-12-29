@@ -41,7 +41,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <Nav isCollapsed={isCollapsed} />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={80} className="p-4">
+          <ResizablePanel defaultSize={80} className="!overflow-auto p-4">
             {children}
           </ResizablePanel>
         </ResizablePanelGroup>

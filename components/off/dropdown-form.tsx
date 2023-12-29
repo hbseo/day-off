@@ -29,6 +29,7 @@ const DropdownForm = ({
   keyField,
   displayField,
   description,
+  placeholder = '',
 }: {
   form: any;
   name: string;
@@ -37,6 +38,7 @@ const DropdownForm = ({
   keyField: string;
   displayField: string;
   description?: string;
+  placeholder?: string;
 }) => {
   const [open, setOpen] = useState(false);
   return (
@@ -45,7 +47,7 @@ const DropdownForm = ({
       name={name}
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>{title}</FormLabel>
+          <FormLabel className="text-md font-bold">{title}</FormLabel>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <FormControl>
@@ -57,11 +59,13 @@ const DropdownForm = ({
                     !field.value && 'text-muted-foreground'
                   )}
                 >
-                  {field.value
-                    ? data.find((d: any) => d[keyField] === field.value)[
-                        displayField
-                      ]
-                    : '선택하세요'}
+                  {field.value ? (
+                    data.find((d: any) => d[keyField] === field.value)[
+                      displayField
+                    ]
+                  ) : (
+                    <span>{placeholder}</span>
+                  )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </FormControl>

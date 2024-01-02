@@ -46,3 +46,21 @@ export const fetchTypeData = () => {
     },
   ];
 };
+
+export const fetchTableData = async () => {
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+
+    return Array.from({ length: 20 }, (_, index) => ({
+      id: index,
+      reason: 'private',
+      start_date: new Date(),
+      end_date: new Date(),
+      count: 1,
+      status: 'approved',
+    }));
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to fetch card data.');
+  }
+};

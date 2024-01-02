@@ -4,7 +4,7 @@ import Form from '@/components/off/create-form';
 
 const Page = () => {
   return (
-    <div>
+    <div className="px-2">
       <Breadcrumbs
         breadcrumbs={[
           { label: '휴가', href: '/off' },

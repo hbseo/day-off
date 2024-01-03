@@ -1,3 +1,7 @@
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
 export const fetchCardData = async () => {
   try {
     const total = 15;
@@ -47,18 +51,17 @@ export const fetchTypeData = () => {
   ];
 };
 
-export const fetchTableData = async () => {
+const ITEMS_PER_PAGE = 6;
+export const fetchTableData = async (query: string, currentPage: number) => {
   try {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+    const data = await prisma.off.findMany({
+      where: {
+        fromUserId: 1,
+      },
+    });
 
-    return Array.from({ length: 20 }, (_, index) => ({
-      id: index,
-      reason: 'private',
-      start_date: new Date(),
-      end_date: new Date(),
-      count: 1,
-      status: 'approved',
-    }));
+    return data;
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch card data.');

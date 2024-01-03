@@ -1,6 +1,6 @@
 'use client';
 
-import { fetchTypeData } from '@/lib/off/data';
+import { OffType, User } from '@/lib/definition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ko } from 'date-fns/locale';
 import { useForm } from 'react-hook-form';
@@ -23,8 +23,9 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import DateItem from './date-item';
 import DropdownForm from './dropdown-form';
+import { createOff } from '@/lib/off/action';
 
-const offFormSchema = z.object({
+export const offFormSchema = z.object({
   fromUser: z.number({
     required_error: '신청자를 선택해야 합니다.',
   }),
@@ -46,7 +47,7 @@ const offFormSchema = z.object({
     .nonempty({ message: '날짜를 하나 이상 선택하세요.' }),
 });
 
-const Form = () => {
+const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
   const form = useForm<z.infer<typeof offFormSchema>>({
     resolver: zodResolver(offFormSchema),
     defaultValues: {
@@ -55,20 +56,8 @@ const Form = () => {
   });
 
   const onSubmit = (data: z.infer<typeof offFormSchema>) => {
-    console.log(data);
+    createOff(data);
   };
-
-  const users = [
-    {
-      id: 1,
-      name: 'John',
-    },
-    {
-      id: 2,
-      name: 'Lee',
-    },
-  ];
-  const types = fetchTypeData();
 
   return (
     <FormContainer {...form}>
@@ -230,4 +219,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default CreateForm;

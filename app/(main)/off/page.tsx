@@ -1,8 +1,17 @@
 import Search from '@/components/search';
 import { CreateOff } from '@/components/off/buttons';
 import OffTable from '@/components/off/table';
+import { Suspense } from 'react';
+import { TableSkeleton } from '@/components/off/skeletons';
 
-const Page = () => {
+const Page = async ({
+  searchParams,
+}: {
+  searchParams?: { query?: string; page?: string };
+}) => {
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+
   return (
     <div className="w-full px-2">
       <div className="flex w-full items-center justify-between">
@@ -12,7 +21,9 @@ const Page = () => {
         <Search placeholder="placeholder" />
         <CreateOff />
       </div>
-      <OffTable />
+      <Suspense fallback={<TableSkeleton />}>
+        <OffTable query={query} currentPage={currentPage} />
+      </Suspense>
     </div>
   );
 };

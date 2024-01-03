@@ -70,7 +70,7 @@ const DropdownForm = ({
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="popover-content-fit-trigger p-0">
+            <PopoverContent className="p-0 popover-content-fit-trigger">
               <Command>
                 <CommandInput placeholder="검색" className="h-9" />
                 <CommandEmpty>없음</CommandEmpty>

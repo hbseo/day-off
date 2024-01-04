@@ -4,6 +4,7 @@ import { ScrollArea } from './ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { useNavPanelStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
+import { useEffect } from 'react';
 
 const dummy: NavigationItem[] = [
   {
@@ -24,7 +25,13 @@ const dummy: NavigationItem[] = [
 ];
 
 const Nav = () => {
-  const { isCollapsed } = useNavPanelStore();
+  const { isCollapsed, setIsCollapsed } = useNavPanelStore();
+
+  useEffect(() => {
+    if (window.innerWidth <= 640) {
+      setIsCollapsed(true);
+    }
+  }, [setIsCollapsed]);
 
   return (
     <ScrollArea

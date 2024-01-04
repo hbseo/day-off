@@ -84,14 +84,20 @@ export const TableSkeleton = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TRow />
-        <TRow />
-        <TRow />
-        <TRow />
-        <TRow />
-        <TRow />
-        <TRow />
+        {Array.from({ length: 7 }, (_, index) => (
+          <TRow key={index} />
+        ))}
       </TableBody>
     </Table>
+  );
+};
+
+export const CardSkeleton = () => {
+  return (
+    <div className="grid gap-4 sm:grid-cols-3">
+      <Skeleton className="h-[110px] rounded-lg border shadow-sm" />
+      <Skeleton className="h-[110px] rounded-lg border shadow-sm" />
+      <Skeleton className="h-[110px] rounded-lg border shadow-sm" />
+    </div>
   );
 };

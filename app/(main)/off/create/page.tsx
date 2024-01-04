@@ -2,9 +2,9 @@ import Breadcrumbs from '@/components/breadcrumbs';
 import CardWrapper from '@/components/off/cards';
 import { Suspense } from 'react';
 import Form from '@/components/off/form';
-import { FormSkeleton } from '@/components/off/skeletons';
+import { CardSkeleton, FormSkeleton } from '@/components/off/skeletons';
 
-const Page = async () => {
+const Page = () => {
   return (
     <div className="px-2">
       <Breadcrumbs
@@ -15,7 +15,9 @@ const Page = async () => {
       />
       <main className="space-y-4">
         <h1 className="text-xl font-bold">현황</h1>
-        <CardWrapper />
+        <Suspense fallback={<CardSkeleton />}>
+          <CardWrapper />
+        </Suspense>
         <Suspense fallback={<FormSkeleton />}>
           <Form />
         </Suspense>

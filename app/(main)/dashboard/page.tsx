@@ -1,5 +1,7 @@
+import { Card } from '@/components/ui/card';
+
 const Page = () => {
-  return <div>dashboard page</div>;
+  return <main></main>;
 };
 
 export default Page;

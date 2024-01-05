@@ -11,6 +11,7 @@ import { useNavPanelStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { LogOut, Menu, Settings, User } from 'lucide-react';
 import { Separator } from './ui/separator';
+import Link from 'next/link';
 
 const Header = () => {
   const { isCollapsed, setIsCollapsed } = useNavPanelStore();
@@ -37,13 +38,17 @@ const Header = () => {
             <DropdownMenuLabel>내 계정</DropdownMenuLabel>
             <Separator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <User className="mr-2 h-4 w-4" />
-                <span>정보</span>
+              <DropdownMenuItem asChild>
+                <Link href="/profile">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>정보</span>
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                <span>설정</span>
+              <DropdownMenuItem asChild>
+                <Link href="/setting">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>설정</span>
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <Separator />

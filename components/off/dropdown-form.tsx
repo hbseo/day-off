@@ -80,7 +80,7 @@ const DropdownForm = ({
                       value={d[displayField]}
                       key={d[keyField]}
                       onSelect={() => {
-                        form.setValue(name, d[keyField]);
+                        field.onChange(d[keyField]);
                         setOpen(false);
                       }}
                     >

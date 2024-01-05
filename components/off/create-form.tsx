@@ -1,13 +1,32 @@
 'use client';
 
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { OffType, User } from '@/lib/definition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ko } from 'date-fns/locale';
-import { useForm } from 'react-hook-form';
+import { Eraser } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { ControllerRenderProps, UseFormReturn, useForm } from 'react-hook-form';
+import ReactSignatureCanvas from 'react-signature-canvas';
+import { toast } from 'sonner';
 import * as z from 'zod';
 import { Button } from '../ui/button';
 import { Calendar } from '../ui/calendar';
 import { Card } from '../ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '../ui/dialog';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+} from '../ui/drawer';
 import {
   Form as FormContainer,
   FormControl,
@@ -23,23 +42,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import DateItem from './date-item';
 import DropdownForm from './dropdown-form';
-import ReactSignatureCanvas from 'react-signature-canvas';
-import { useEffect, useRef, useState } from 'react';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '../ui/dialog';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-} from '../ui/drawer';
 
 export const offFormSchema = z.object({
   fromUser: z.number({
@@ -55,35 +57,54 @@ export const offFormSchema = z.object({
     .string({
       required_error: '사유를 입력해야 합니다.',
     })
+    .max(100, { message: '100자 이하로 입력해주세요.' })
     .optional(),
   date: z
     .array(z.object({ date: z.date(), type: z.string() }), {
       required_error: '날짜를 하나 이상 선택하세요.',
     })
     .nonempty({ message: '날짜를 하나 이상 선택하세요.' }),
-  signature: z.unknown(),
+  signature: z.string(),
 });
 
 const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
-  const [signOpen, setSignOpen] = useState(true);
-  const signCanvas = useRef() as React.MutableRefObject<any>;
+  const [signOpen, setSignOpen] = useState(false);
+  const signCanvas = useRef<ReactSignatureCanvas>(null);
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
-  // useEffect(() => {
-  //   if (!signCanvas.current) {
-  //     return;
-  //   }
-  // }, [signCanvas])
+  const handleSignature = (
+    form: UseFormReturn<z.infer<typeof offFormSchema>, any, undefined>,
+    field: ControllerRenderProps<z.infer<typeof offFormSchema>, 'signature'>
+  ) => {
+    if (!signCanvas.current) return;
+
+    if (signCanvas.current.isEmpty()) {
+      toast.error('서명을 해주세요.');
+      return;
+    }
+    field.onChange(signCanvas.current.toDataURL());
+
+    form.handleSubmit(onSubmit)();
+    setSignOpen(false);
+  };
+
+  const handleErase = () => {
+    if (!signCanvas.current) return;
+
+    signCanvas.current.clear();
+  };
 
   const form = useForm<z.infer<typeof offFormSchema>>({
     resolver: zodResolver(offFormSchema),
     defaultValues: {
       reason: '',
     },
+    mode: 'onChange',
   });
 
   const onSubmit = (data: z.infer<typeof offFormSchema>) => {
-    console.log('a');
+    console.log(data);
+    toast.success('휴가 신청을 완료했습니다.');
     // createOff(data);
   };
 
@@ -239,37 +260,6 @@ const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
             </FormItem>
           )}
         />
-        {/* <FormField
-          control={form.control}
-          name="signature"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-md font-bold">서명</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <ReactSignatureCanvas
-                    penColor="black"
-                    backgroundColor="#f6f8fa"
-                    clearOnResize={false}
-                    canvasProps={{ width: 400, height: 200 }}
-                    ref={signCanvas}
-                  />
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      if (signCanvas.current) {
-                        signCanvas.current.clear();
-                      }
-                    }}
-                    className="absolute left-0 top-0 w-2"
-                  >
-                    지우기
-                  </Button>
-                </div>
-              </FormControl>
-            </FormItem>
-          )}
-        /> */}
         <FormField
           control={form.control}
           name="signature"
@@ -284,15 +274,30 @@ const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
                         직접 마우스로 서명을 하세요.
                       </DialogDescription>
                     </DialogHeader>
-                    <ReactSignatureCanvas
-                      penColor="black"
-                      backgroundColor="#e8ebec"
-                      clearOnResize={false}
-                      canvasProps={{ className: 'w-full h-[300px]' }}
-                      ref={signCanvas}
-                    />
+                    <div className="relative">
+                      <ReactSignatureCanvas
+                        penColor="black"
+                        canvasProps={{
+                          className:
+                            'w-full h-[300px] rounded-lg border-2 border-slate-600',
+                        }}
+                        ref={signCanvas}
+                      />
+                      <Button
+                        onClick={handleErase}
+                        className="absolute bottom-2 right-2 w-16 rounded-full border border-black"
+                      >
+                        <Eraser />
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-2 gap-2">
-                      <Button className="">제출</Button>
+                      <Button
+                        onClick={() => {
+                          handleSignature(form, field);
+                        }}
+                      >
+                        제출
+                      </Button>
                       <Button
                         variant="outline"
                         onClick={() => {
@@ -305,7 +310,11 @@ const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
                   </DialogContent>
                 </Dialog>
               ) : (
-                <Drawer open={signOpen} onOpenChange={setSignOpen}>
+                <Drawer
+                  open={signOpen}
+                  onOpenChange={setSignOpen}
+                  dismissible={false}
+                >
                   <DrawerContent>
                     <DrawerHeader className="text-left text-lg font-semibold">
                       서명
@@ -313,17 +322,30 @@ const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
                     <DrawerDescription className="px-4">
                       직접 마우스로 서명을 하세요.
                     </DrawerDescription>
-                    <div className="px-4 py-2">
+                    <div className="relative px-4 py-2">
                       <ReactSignatureCanvas
                         penColor="black"
-                        backgroundColor="#e8ebec"
-                        clearOnResize={false}
-                        canvasProps={{ className: 'w-full h-[300px]' }}
+                        canvasProps={{
+                          className:
+                            'w-full h-[300px] rounded-lg border-2 border-slate-600',
+                        }}
                         ref={signCanvas}
                       />
+                      <Button
+                        onClick={handleErase}
+                        className="absolute bottom-4 right-6 w-16 rounded-full border border-black"
+                      >
+                        <Eraser />
+                      </Button>
                     </div>
-                    <DrawerFooter className="gap-2X grid">
-                      <Button className="">제출</Button>
+                    <DrawerFooter className="grid gap-2">
+                      <Button
+                        onClick={() => {
+                          handleSignature(form, field);
+                        }}
+                      >
+                        제출
+                      </Button>
                       <Button
                         variant="outline"
                         onClick={() => {
@@ -343,12 +365,13 @@ const CreateForm = ({ users, types }: { users: User[]; types: OffType[] }) => {
           className="w-full sm:w-28"
           type="button"
           onClick={() => {
-            form.trigger().then((valid) => {
-              setSignOpen(true);
-              // if (valid) {
-              //   setSignOpen(true);
-              // }
-            });
+            form
+              .trigger(['date', 'fromUser', 'reason', 'toUser', 'type'])
+              .then((valid) => {
+                if (valid) {
+                  setSignOpen(true);
+                }
+              });
           }}
         >
           신청

@@ -2,6 +2,7 @@ import { Toaster } from '@/components/ui/sonner';
 import type { Metadata } from 'next';
 import { Noto_Sans_KR } from 'next/font/google';
 import './globals.css';
+import Providers from './providers';
 
 const noto = Noto_Sans_KR({ preload: false });
 
@@ -18,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="kr">
       <body className={noto.className}>
-        {children}
+        <Providers>{children}</Providers>
         <Toaster richColors closeButton />
       </body>
     </html>

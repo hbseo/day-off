@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import * as bcrypt from 'bcrypt';
 
 type RequestBody = {
-  username: string;
+  email: string;
   password: string;
 };
 
@@ -12,9 +12,10 @@ export async function POST(request: Request) {
 
   const user = await prisma.user.findFirst({
     where: {
-      email: body.username,
+      email: body.email,
     },
   });
+  console.log(user);
 
   if (user && (await bcrypt.compare(body.password, user.password))) {
     const { password, ...userWithoutPass } = user;

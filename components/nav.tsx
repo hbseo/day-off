@@ -1,3 +1,5 @@
+'use client';
+
 import { LayoutDashboard, Palmtree } from 'lucide-react';
 import { NavItem, NavItemCollapsed, NavigationItem } from './nav-item';
 import { ScrollArea } from './ui/scroll-area';
@@ -27,11 +29,19 @@ const dummy: NavigationItem[] = [
 const Nav = () => {
   const { isCollapsed, setIsCollapsed } = useNavPanelStore();
 
-  useEffect(() => {
-    if (window.innerWidth <= 640) {
+  const handleResize = () => {
+    const width = window.innerWidth;
+    if (width <= 640) {
       setIsCollapsed(true);
     }
-  }, [setIsCollapsed]);
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  });
 
   return (
     <ScrollArea

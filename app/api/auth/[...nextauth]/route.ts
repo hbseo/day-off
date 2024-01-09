@@ -6,7 +6,7 @@ const handler = NextAuth({
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        username: { label: 'Username', type: 'text', placeholder: 'jsmith' },
+        email: { label: 'Email', type: 'text' },
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials, req) {
@@ -16,12 +16,12 @@ const handler = NextAuth({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            username: credentials?.username,
+            email: credentials?.email,
             password: credentials?.password,
           }),
         });
+
         const user = await res.json();
-        console.log(user);
 
         if (user) {
           return user;
@@ -40,6 +40,10 @@ const handler = NextAuth({
       session.user = token as any;
       return session;
     },
+  },
+  pages: {
+    signIn: '/auth/signin',
+    error: 'auth/error',
   },
 });
 

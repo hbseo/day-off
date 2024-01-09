@@ -1,9 +1,35 @@
-import NextAuth from 'next-auth';
-// import { authConfig } from './auth.config';
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyJwt } from './lib/jwt';
 
-// export default NextAuth(authConfig).auth;
+export async function middleware(req: NextRequest, res: NextResponse) {
+  const bearerToken = req.headers.get('accessToken') as string;
+
+  if (!bearerToken) {
+    return new NextResponse(
+      JSON.stringify({ errorMessage: 'Unauthorized request' }),
+      { status: 401 }
+    );
+  }
+
+  const token = bearerToken.split(' ')[1];
+
+  if (!token) {
+    return new NextResponse(
+      JSON.stringify({ errorMessage: 'Unauthorized request' }),
+      { status: 401 }
+    );
+  }
+
+  try {
+    verifyJwt(token);
+  } catch (error) {
+    return new NextResponse(
+      JSON.stringify({ errorMessage: 'Unauthorized request' }),
+      { status: 401 }
+    );
+  }
+}
 
 export const config = {
-  // https://nextjs.org/docs/app/building-your-application/routing/middleware#matcher
-  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+  matcher: ['/dashboard'],
 };
